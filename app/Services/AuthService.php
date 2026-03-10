@@ -11,8 +11,6 @@ class AuthService
 
     public function register($request)
     {
-        dd($request->all());
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -27,7 +25,7 @@ class AuthService
 
         Auth::login($user);
 
-        return redirect('/dashboard');
+        return redirect()->route('dashboard');
 
     }
 
@@ -40,12 +38,22 @@ class AuthService
 
         if (Auth::attempt($credentials)) {
 
-            return redirect('/dashboard');
+            return redirect()->route('dashboard');
 
         }
 
         return back()->with('error','Invalid email or password');
 
+    }
+    
+    public function logout($request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('login');
     }
 
 }
