@@ -3,7 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Créer un compte - SallePro</title>
+    <title>Inscription - SallePro</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('Salle-Pro.png') }}" type="image/png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,6 +27,7 @@
     <div class="relative z-10 w-full max-w-md px-6 py-12 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 shadow-green-900/5 my-8">
         
         <div class="text-center mb-10 border-b border-gray-100 pb-8">
+            <img src="{{ asset('Salle-Pro.png') }}" alt="SallePro Logo" class="h-16 w-auto mx-auto mb-4 drop-shadow-sm">
             <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-green-500 mb-2">Rejoignez-nous</h1>
             <p class="text-gray-500 font-medium">Créez votre compte pour commencer.</p>
         </div>

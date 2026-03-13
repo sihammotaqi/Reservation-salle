@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tableau de bord - SallePro</title>
     
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('Salle-Pro.png') }}" type="image/png">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,8 +24,11 @@
                 <!-- Logo & Links -->
                 <div class="flex">
                     <div class="shrink-0 flex items-center">
-                        <a href="{{ route('dashboard') }}" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-green-500">
-                            SallePro
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
+                            <img src="{{ asset('Salle-Pro.png') }}" alt="SallePro Logo" class="h-9 w-auto drop-shadow-sm">
+                            <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-green-500">
+                                SallePro
+                            </span>
                         </a>
                     </div>
                 </div>
