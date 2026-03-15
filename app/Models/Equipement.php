@@ -9,10 +9,12 @@ class Equipement extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom', 'quantite', 'salle_id'];
+    protected $fillable = ['nom', 'description', 'quantite'];
 
-    public function salle()
+    public function salles()
     {
-        return $this->belongsTo(Salle::class);
+        return $this->belongsToMany(Salle::class)
+                    ->withPivot('quantite')
+                    ->withTimestamps();
     }
 }

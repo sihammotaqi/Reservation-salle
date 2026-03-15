@@ -11,20 +11,19 @@ class EquipementController extends Controller
 {
     public function index()
     {
-        $equipements = Equipement::with('salle')->latest()->get();
-        $salles = Salle::all();
-        return view('admin.equipements.index', compact('equipements', 'salles'));
+        $equipements = Equipement::latest()->get();
+        return view('admin.equipements.index', compact('equipements'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nom'      => 'required|string|max:255',
-            'quantite' => 'required|integer|min:1',
-            'salle_id' => 'nullable|exists:salles,id',
+            'nom'         => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'quantite'    => 'required|integer|min:0',
         ]);
 
-        Equipement::create($request->only(['nom', 'quantite', 'salle_id']));
+        Equipement::create($request->only(['nom', 'description', 'quantite']));
 
         return redirect()->route('admin.equipements.index')->with('success', 'Équipement ajouté.');
     }
@@ -32,12 +31,12 @@ class EquipementController extends Controller
     public function update(Request $request, Equipement $equipement)
     {
         $request->validate([
-            'nom'      => 'required|string|max:255',
-            'quantite' => 'required|integer|min:1',
-            'salle_id' => 'nullable|exists:salles,id',
+            'nom'         => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'quantite'    => 'required|integer|min:0',
         ]);
 
-        $equipement->update($request->only(['nom', 'quantite', 'salle_id']));
+        $equipement->update($request->only(['nom', 'description', 'quantite']));
 
         return redirect()->route('admin.equipements.index')->with('success', 'Équipement mis à jour.');
     }

@@ -9,7 +9,7 @@ class Salle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom', 'capacite', 'description', 'disponible'];
+    protected $fillable = ['nom', 'capacite', 'localisation', 'description', 'disponible'];
 
     protected $casts = [
         'disponible' => 'boolean',
@@ -17,8 +17,12 @@ class Salle extends Model
 
     public function equipements()
     {
-        return $this->hasMany(Equipement::class);
+        return $this->belongsToMany(Equipement::class)
+                    ->withPivot('quantite')
+                    ->withTimestamps();
     }
+
+
 
     public function plannings()
     {

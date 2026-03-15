@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
 // Admin-only routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('salles', SalleController::class);
-    Route::resource('utilisateurs', UtilisateurController::class)->except(['create', 'store']);
+    Route::resource('utilisateurs', UtilisateurController::class);
     Route::resource('planning', PlanningController::class);
     Route::resource('equipements', EquipementController::class)->except(['create', 'edit', 'show']);
 });

@@ -3,368 +3,329 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tableau de bord - SallePro</title>
-    
-    <!-- Favicon -->
+    <title>Tableau de bord (Admin) - SallePro</title>
     <link rel="icon" href="{{ asset('Salle-Pro.png') }}" type="image/png">
-    
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
+<body class="min-h-screen bg-gray-50 flex flex-col">
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
-        <div class="w-full px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+    <!-- Main Container -->
+    <div class="w-full flex-1 flex flex-col">
 
-                <!-- Logo + Nav Links -->
-                <div class="flex items-center gap-8">
-                    <!-- Logo -->
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 shrink-0">
-                        <img src="{{ asset('Salle-Pro.png') }}" alt="SallePro Logo" class="h-9 w-auto drop-shadow-sm">
-                        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-green-500">
-                            SallePro
-                        </span>
-                    </a>
+        <!-- Navbar -->
+        <nav class="border-b border-gray-100 px-6">
+            <div class="flex items-center justify-between h-16">
 
-                    @if(Auth::user()->role === 'admin')
-                    <!-- Admin Nav Links -->
-                    <div class="hidden md:flex items-center gap-1">
-                        <a href="{{ route('dashboard') }}" id="nav-dashboard"
-                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-green-600 bg-green-50 transition-all duration-150">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
-                            Tableau de bord
-                        </a>
-
-                        <a href="{{ route('admin.salles.index') }}" id="nav-salles"
-                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-150">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                            Salles
-                        </a>
-
-                        <a href="{{ route('admin.utilisateurs.index') }}" id="nav-utilisateurs"
-                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-150">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            Utilisateurs
-                        </a>
-
-                        <a href="{{ route('admin.planning.index') }}" id="nav-planning"
-                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-150">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            Salle Planning
-                        </a>
-
-                        <a href="{{ route('admin.equipements.index') }}" id="nav-equipement"
-                           class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all duration-150">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
-                            </svg>
-                            Équipement
-                        </a>
+                <!-- Logo -->
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 shrink-0">
+                    <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">S</span>
                     </div>
-                    @endif
-                </div>
+                    <span class="text-base font-bold text-gray-900">SallePro</span>
+                </a>
 
-                <!-- Right Side: Profile Dropdown -->
-                <div class="flex items-center">
+                @if(Auth::user()->role === 'admin')
+                <!-- Centered Nav Links -->
+                <div class="hidden md:flex items-end h-16 gap-1">
+                    <a href="{{ route('dashboard') }}"
+                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 transition-colors text-green-600 border-green-500">
+                        Tableau de bord
+                    </a>
+                    <a href="{{ route('admin.salles.index') }}"
+                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors">
+                        Salles
+                    </a>
+                    <a href="{{ route('admin.utilisateurs.index') }}"
+                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors">
+                        Utilisateurs
+                    </a>
+                    <a href="{{ route('admin.planning.index') }}"
+                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors">
+                        Salles planning
+                    </a>
+                    <a href="{{ route('admin.equipements.index') }}"
+                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-colors">
+                        Équipements
+                    </a>
+                </div>
+                @endif
+
+                <!-- Right: Profile Dropdown -->
+                <div class="flex items-center gap-3">
                     @if(Auth::user()->role === 'admin')
-                    <!-- Admin Profile Dropdown -->
                     <div class="relative" id="profile-menu-wrapper">
-                        <button id="profile-btn" onclick="toggleProfileMenu()"
-                            class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50 hover:bg-green-50 border border-gray-200 hover:border-green-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1">
-                            <!-- Avatar -->
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                        <button onclick="toggleProfileMenu()"
+                            class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none">
+                            <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ Auth::user()->name }}</span>
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-sm font-bold">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </div>
-                            <div class="hidden sm:block text-left">
-                                <p class="text-sm font-semibold text-gray-800 leading-none">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-green-600 font-medium mt-0.5 capitalize">{{ Auth::user()->role }}</p>
-                            </div>
-                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" id="profile-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform" id="profile-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
 
                         <!-- Dropdown Panel -->
-                        <div id="profile-dropdown"
-                             class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
-                            
-                            <!-- User Info Header -->
-                            <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-                                <p class="text-xs text-gray-500">Connecté en tant que</p>
-                                <p class="text-sm font-bold text-gray-800 truncate">{{ Auth::user()->email }}</p>
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                            <div class="px-4 py-2.5 border-b border-gray-100">
+                                <p class="text-xs text-gray-400">Connecté en tant que</p>
+                                <p class="text-sm font-semibold text-gray-800 truncate">{{ Auth::user()->email }}</p>
                             </div>
-
-                            <!-- Menu Items -->
-                            <div class="py-1">
-                                <a href="{{ route('profile.show') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group">
-                                    <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-green-100 flex items-center justify-center transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                        </svg>
-                                    </div>
-                                    Mon Profil
-                                </a>
-
-                                <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors group">
-                                    <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-green-100 flex items-center justify-center transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                    </div>
-                                    Paramètres
-                                </a>
-                            </div>
-
-                            <!-- Divider -->
+                            <a href="{{ route('profile.show') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                Mon Profil
+                            </a>
+                            <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                Paramètres
+                            </a>
                             <div class="border-t border-gray-100 my-1"></div>
-
-                            <!-- Sign Out -->
-                            <div class="py-1">
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group">
-                                        <div class="w-7 h-7 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                            </svg>
-                                        </div>
-                                        Se déconnecter
-                                    </button>
-                                </form>
-                            </div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    Se déconnecter
+                                </button>
+                            </form>
                         </div>
                     </div>
-
                     @else
-                    <!-- Regular User: simple logout -->
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-medium text-gray-700">Bonjour, {{ Auth::user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:text-red-500 hover:border-red-200 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 shadow-sm">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
-                                Déconnexion
-                            </button>
-                        </form>
-                    </div>
+                    <!-- Regular user: simple logout -->
+                    <span class="text-sm text-gray-600">Bonjour, {{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200">Déconnexion</button>
+                    </form>
                     @endif
+                </div>
+            </div>
+        </nav>
 
-                    <!-- Mobile Hamburger (admin only) -->
-                    @if(Auth::user()->role === 'admin')
-                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="ml-3 md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 transition-colors">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        <!-- Page Body -->
+        <div class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 space-y-6">
+
+            <!-- Page Header Row -->
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Tableau de Bord Global</h1>
+                    <p class="text-sm text-gray-500 mt-1">Aperçu général du système de réservation et de son utilisation.</p>
+                </div>
+                <!-- Search Bar -->
+                <div class="relative hidden sm:block">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" placeholder="Rechercher des salles, utilisateurs..."
+                        class="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 w-72 transition-all">
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Stat 1: Total Salles -->
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex items-start justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Salles</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-1" id="count-salles">—</p>
+                        <p class="text-xs text-green-600 font-medium mt-2 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Gestion des salles
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
-                    </button>
-                    @endif
+                    </div>
+                </div>
+
+                <!-- Stat 2: Réservations Totales -->
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex items-start justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Réservations Totales</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-1" id="count-reservations">—</p>
+                        <p class="text-xs text-green-600 font-medium mt-2 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                            Toutes les réservations
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Stat 3: En Attente -->
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex items-start justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">En Attente</p>
+                        <p class="text-4xl font-bold text-gray-900 mt-1" id="count-attente">—</p>
+                        <p class="text-xs text-orange-500 font-medium mt-2 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Demandes en attente
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Mobile Nav Links (Admin) -->
-        @if(Auth::user()->role === 'admin')
-        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white px-4 pb-3 pt-2 space-y-1">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-green-600 bg-green-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                Tableau de bord
-            </a>
-            <a href="{{ route('admin.salles.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Salles
-            </a>
-            <a href="{{ route('admin.utilisateurs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Utilisateurs
-            </a>
-            <a href="{{ route('admin.planning.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Salle Planning
-            </a>
-            <a href="{{ route('admin.equipements.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:text-green-600 hover:bg-green-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
-                Équipement
-            </a>
-        </div>
-        @endif
-    </nav>
+            <!-- Pending Requests Table -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                <!-- Table Header -->
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-900">Demandes en attente</h2>
+                    <div class="flex items-center gap-2">
+                        <button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                            Filtrer
+                        </button>
+                        <button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                            Trier
+                        </button>
+                    </div>
+                </div>
 
-    <!-- Page Header -->
-    <header class="bg-white shadow-sm border-b border-gray-100/50">
-        <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-                @if(Auth::user()->role === 'admin')
-                <p class="text-sm text-gray-500 mt-0.5">Bienvenue dans l'espace d'administration.</p>
-                @endif
-            </div>
-            @if(Auth::user()->role === 'admin')
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 ring-1 ring-green-200">
-                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
-                Admin
-            </span>
-            @endif
-        </div>
-    </header>
+                <!-- Table -->
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Demandeur</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Salle</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Horaire</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Type</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                            <th class="px-5 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wide">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-tbody" class="divide-y divide-gray-50">
+                        @php
+                            $pending = \App\Models\Planning::with(['salle', 'user'])
+                                ->where('statut', 'en_attente')
+                                ->latest()
+                                ->take(10)
+                                ->get();
+                        @endphp
 
-    <!-- Main Content -->
-    <main class="py-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Welcome Banner -->
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-xl overflow-hidden mb-8">
-                <div class="px-6 py-8 sm:p-10 text-white relative">
-                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white rounded-full mix-blend-overlay filter blur-xl opacity-20"></div>
-                    <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-green-300 rounded-full mix-blend-overlay filter blur-xl opacity-20"></div>
-                    
-                    <h2 class="text-3xl font-bold mb-1 relative z-10">Bienvenue, {{ Auth::user()->name }} !</h2>
-                    <p class="text-green-50 text-base max-w-2xl relative z-10">
-                        @if(Auth::user()->role === 'admin')
-                            Vous gérez l'ensemble de la plateforme SallePro en tant qu'administrateur.
-                        @else
-                            C'est ici que vous pourrez gérer vos réservations de salles.
-                        @endif
+                        @forelse($pending as $p)
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <!-- Demandeur -->
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                                         style="background: {{ ['#22c55e','#3b82f6','#f97316','#8b5cf6','#ec4899'][crc32($p->user->name) % 5] }}">
+                                        {{ strtoupper(substr($p->user->name, 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">{{ $p->user->name }}</p>
+                                        <p class="text-xs text-gray-400">{{ $p->user->email }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- Salle -->
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-1.5 text-sm text-gray-700">
+                                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    {{ $p->salle->nom }}
+                                </div>
+                            </td>
+                            <!-- Horaire -->
+                            <td class="px-5 py-4">
+                                <p class="text-sm text-gray-700">{{ $p->date_debut->format('H:i') }} - {{ $p->date_fin->format('H:i') }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    {{ $p->date_debut->isToday() ? "Aujourd'hui" : ($p->date_debut->isTomorrow() ? 'Demain' : $p->date_debut->format('d/m/Y')) }}
+                                </p>
+                            </td>
+                            <!-- Type/Titre -->
+                            <td class="px-5 py-4">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-green-100 text-green-700">
+                                    {{ strtoupper($p->titre) }}
+                                </span>
+                            </td>
+                            <!-- Status -->
+                            <td class="px-5 py-4">
+                                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-yellow-600">
+                                    <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                                    En attente
+                                </span>
+                            </td>
+                            <!-- Actions -->
+                            <td class="px-5 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <form method="POST" action="{{ route('admin.planning.update', $p) }}">
+                                        @csrf @method('PUT')
+                                        <input type="hidden" name="statut" value="approuve">
+                                        <button type="submit" class="text-green-500 hover:text-green-700 transition-colors" title="Approuver">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.planning.update', $p) }}">
+                                        @csrf @method('PUT')
+                                        <input type="hidden" name="statut" value="rejete">
+                                        <button type="submit" class="text-red-400 hover:text-red-600 transition-colors" title="Rejeter">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="px-5 py-12 text-center text-gray-400 text-sm">
+                                Aucune demande en attente.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                <!-- Table Footer -->
+                <div class="flex items-center justify-between px-5 py-4 border-t border-gray-100">
+                    <p class="text-sm text-gray-500">
+                        Affichage de {{ $pending->count() }} demande(s) en attente
                     </p>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('admin.planning.index') }}"
+                           class="px-4 py-1.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors">
+                            Voir tout
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Dashboard Cards Grid -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                
-                <!-- Card 1 -->
-                <div class="bg-white overflow-hidden shadow border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-green-50 text-green-600 rounded-xl p-3">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <div class="ml-4 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Réservations Actives</dt>
-                                    <dd class="text-2xl font-bold text-gray-900">0</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="bg-white overflow-hidden shadow border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-green-50 text-green-600 rounded-xl p-3">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                            </div>
-                            <div class="ml-4 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Salles Disponibles</dt>
-                                    <dd class="text-2xl font-bold text-gray-900">À venir</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Card 3 -->
-                <div class="bg-white overflow-hidden shadow border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-green-50 text-green-600 rounded-xl p-3">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div class="ml-4 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Heures Réservées</dt>
-                                    <dd class="text-2xl font-bold text-gray-900">0h</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                @if(Auth::user()->role === 'admin')
-                <!-- Admin Card: Users -->
-                <div class="bg-white overflow-hidden shadow border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-purple-50 text-purple-600 rounded-xl p-3">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            </div>
-                            <div class="ml-4 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Utilisateurs</dt>
-                                    <dd class="text-2xl font-bold text-gray-900">À venir</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Admin Card: Equipment -->
-                <div class="bg-white overflow-hidden shadow border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-orange-50 text-orange-600 rounded-xl p-3">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"></path></svg>
-                            </div>
-                            <div class="ml-4 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Équipements</dt>
-                                    <dd class="text-2xl font-bold text-gray-900">À venir</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-            </div>
         </div>
-    </main>
+    </div><!-- /Main Container -->
 
+    @php
+        $countSalles       = \App\Models\Salle::count();
+        $countReservations = \App\Models\Planning::count();
+        $countAttente      = \App\Models\Planning::where('statut', 'en_attente')->count();
+    @endphp
     <script>
-        // Profile Dropdown
-        function toggleProfileMenu() {
-            const dropdown = document.getElementById('profile-dropdown');
-            const chevron = document.getElementById('profile-chevron');
-            dropdown.classList.toggle('hidden');
-            chevron.classList.toggle('rotate-180');
-        }
+        document.getElementById('count-salles').textContent        = '{{ $countSalles }}';
+        document.getElementById('count-reservations').textContent  = '{{ $countReservations }}';
+        document.getElementById('count-attente').textContent       = '{{ $countAttente }}';
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const wrapper = document.getElementById('profile-menu-wrapper');
-            const dropdown = document.getElementById('profile-dropdown');
-            if (wrapper && dropdown && !wrapper.contains(event.target)) {
-                dropdown.classList.add('hidden');
+        function toggleProfileMenu() {
+            document.getElementById('profile-dropdown').classList.toggle('hidden');
+            document.getElementById('profile-chevron').classList.toggle('rotate-180');
+        }
+        document.addEventListener('click', function(e) {
+            const w = document.getElementById('profile-menu-wrapper');
+            if (w && !w.contains(e.target)) {
+                document.getElementById('profile-dropdown')?.classList.add('hidden');
                 document.getElementById('profile-chevron')?.classList.remove('rotate-180');
             }
         });
-
-        // Mobile Menu
-        function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        }
     </script>
-
 </body>
 </html>
