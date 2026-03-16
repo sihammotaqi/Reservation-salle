@@ -22,9 +22,7 @@
 
                 <!-- Logo -->
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 shrink-0">
-                    <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">S</span>
-                    </div>
+                    <img src="{{ asset('Salle-Pro.png') }}" alt="SallePro Logo" class="h-8 w-auto drop-shadow-sm">
                     <span class="text-base font-bold text-gray-900">SallePro</span>
                 </a>
 

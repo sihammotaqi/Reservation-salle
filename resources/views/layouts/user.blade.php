@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin') - SallePro</title>
+    <title>@yield('title', 'Portail Utilisateur') - SallePro</title>
     <link rel="icon" href="{{ asset('Salle-Pro.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,41 +19,31 @@
     <div class="w-full flex-1 flex flex-col">
 
         <!-- Navbar -->
-        <nav class="border-b border-gray-100 px-6 py-0">
+        <nav class="border-b border-gray-100 px-6 bg-white">
             <div class="flex items-center justify-between h-16">
 
                 <!-- Logo -->
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 shrink-0">
+                <a href="{{ route('user.dashboard') }}" class="flex items-center gap-2.5 shrink-0">
                     <img src="{{ asset('Salle-Pro.png') }}" alt="SallePro Logo" class="h-8 w-auto drop-shadow-sm">
                     <span class="text-base font-bold text-gray-900">SallePro</span>
                 </a>
 
                 <!-- Centered Nav Links -->
                 <div class="hidden md:flex items-end h-16 gap-1">
-                    <a href="{{ route('dashboard') }}"
+                    <a href="{{ route('user.dashboard') }}"
                        class="flex items-center px-4 h-full text-sm font-medium border-b-2 transition-colors
-                              {{ request()->routeIs('dashboard') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
+                              {{ request()->routeIs('user.dashboard') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
                         Tableau de bord
                     </a>
-                    <a href="{{ route('admin.salles.index') }}"
+                    <a href="{{ route('user.salles.index') }}"
                        class="flex items-center px-4 h-full text-sm font-medium border-b-2 transition-colors
-                              {{ request()->routeIs('admin.salles.*') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
+                              {{ request()->routeIs('user.salles.*') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
                         Salles
                     </a>
-                    <a href="{{ route('admin.utilisateurs.index') }}"
+                    <a href="{{ route('user.reservations.index') }}"
                        class="flex items-center px-4 h-full text-sm font-medium border-b-2 transition-colors
-                              {{ request()->routeIs('admin.utilisateurs.*') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
-                        Utilisateurs
-                    </a>
-                    <a href="{{ route('admin.planning.index') }}"
-                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 transition-colors
-                              {{ request()->routeIs('admin.planning.*') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
-                        Salles planning
-                    </a>
-                    <a href="{{ route('admin.equipements.index') }}"
-                       class="flex items-center px-4 h-full text-sm font-medium border-b-2 transition-colors
-                              {{ request()->routeIs('admin.equipements.*') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
-                        Équipement
+                              {{ request()->routeIs('user.reservations.*') ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-800 hover:border-gray-300' }}">
+                        Mes Réservations
                     </a>
                 </div>
 
@@ -81,10 +71,6 @@
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             Mon Profil
                         </a>
-                        <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Paramètres
-                        </a>
                         <div class="border-t border-gray-100 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -104,11 +90,9 @@
 
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="hidden md:hidden pb-3 space-y-1">
-                <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Tableau de bord</a>
-                <a href="{{ route('admin.salles.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.salles.*') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Salles</a>
-                <a href="{{ route('admin.utilisateurs.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.utilisateurs.*') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Utilisateurs</a>
-                <a href="{{ route('admin.planning.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.planning.*') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Salles planning</a>
-                <a href="{{ route('admin.equipements.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('admin.equipements.*') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Équipement</a>
+                <a href="{{ route('user.dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('user.dashboard') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Tableau de bord</a>
+                <a href="{{ route('user.salles.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('user.salles.*') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Salles</a>
+                <a href="{{ route('user.reservations.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('user.reservations.*') ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:bg-gray-50' }}">Mes Réservations</a>
             </div>
         </nav>
 

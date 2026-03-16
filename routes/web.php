@@ -1,12 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\SalleController;
 use App\Http\Controllers\Admin\UtilisateurController;
 use App\Http\Controllers\Admin\PlanningController;
 use App\Http\Controllers\Admin\EquipementController;
+use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\User\UserSalleController;
+use App\Http\Controllers\User\UserReservationController;
 
 // Guest routes
 Route::middleware('guest')->group(function () {
@@ -20,7 +24,10 @@ Route::middleware('guest')->group(function () {
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        if (Auth::user()->role === 'admin') {
+            return view('dashboard');
+        }
+        return redirect()->route('user.dashboard');
     })->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -28,6 +35,16 @@ Route::middleware('auth')->group(function () {
     // Profile (any authenticated user)
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // User Portal Routes (Regular users & responsibles)
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/salles', [UserSalleController::class, 'index'])->name('salles.index');
+        Route::get('/salles/{salle}', [UserSalleController::class, 'show'])->name('salles.show');
+        Route::get('/reservations', [UserReservationController::class, 'index'])->name('reservations.index');
+        Route::post('/reservations', [UserReservationController::class, 'store'])->name('reservations.store');
+        Route::delete('/reservations/{planning}', [UserReservationController::class, 'destroy'])->name('reservations.destroy');
+    });
 });
 
 // Admin-only routes
