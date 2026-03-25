@@ -9,7 +9,13 @@ class Planning extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['salle_id', 'user_id', 'titre', 'date_debut', 'date_fin', 'statut'];
+    // Status Constants
+    public const STATUT_EN_ATTENTE = 'en_attente';
+    public const STATUT_APPROUVE   = 'approuve';
+    public const STATUT_REJETE     = 'rejete';
+    public const STATUT_ANNULE     = 'annule';
+
+    protected $fillable = ['salle_id', 'user_id', 'titre', 'date_debut', 'date_fin', 'statut', 'type_evenement'];
 
     protected $casts = [
         'date_debut' => 'datetime',
@@ -24,5 +30,13 @@ class Planning extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope: réservations actives (bloquent les créneaux)
+     */
+    public function scopeActives($query)
+    {
+        return $query->whereIn('statut', [self::STATUT_EN_ATTENTE, self::STATUT_APPROUVE]);
     }
 }

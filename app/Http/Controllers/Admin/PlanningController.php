@@ -7,13 +7,27 @@ use App\Models\Planning;
 use App\Models\Salle;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PlanningController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $plannings = Planning::with(['salle', 'user'])->latest()->get();
-        return view('admin.planning.index', compact('plannings'));
+        $today = Carbon::today();
+        $view  = $request->get('view', 'timeline');
+
+        // Pour la timeline — salles avec leurs réservations du jour en cours et à venir
+        $salles = Salle::with(['plannings' => function ($q) use ($today) {
+            $q->whereIn('statut', ['approuve', 'en_attente', 'rejete'])
+              ->where('date_fin', '>=', now())
+              ->with('user')
+              ->orderBy('date_debut');
+        }])->where('disponible', true)->paginate(5);
+
+        // Pour la liste — toutes les réservations
+        $plannings = Planning::with(['salle', 'user'])->latest()->paginate(5);
+
+        return view('admin.planning.index', compact('plannings', 'salles', 'today', 'view'));
     }
 
     public function create()
@@ -33,14 +47,17 @@ class PlanningController extends Controller
             'date_fin'   => 'required|date|after:date_debut',
         ]);
 
-        Planning::create($request->only(['salle_id', 'user_id', 'titre', 'date_debut', 'date_fin']) + ['statut' => 'en_attente']);
+        Planning::create(
+            $request->only(['salle_id', 'user_id', 'titre', 'date_debut', 'date_fin'])
+            + ['statut' => 'en_attente']
+        );
 
         return redirect()->route('admin.planning.index')->with('success', 'Réservation créée.');
     }
 
     public function update(Request $request, Planning $planning)
     {
-        $request->validate(['statut' => 'required|in:en_attente,approuve,rejete']);
+        $request->validate(['statut' => 'required|in:en_attente,approuve,rejete,annule']);
         $planning->update(['statut' => $request->statut]);
         return redirect()->route('admin.planning.index')->with('success', 'Statut mis à jour.');
     }

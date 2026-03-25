@@ -138,22 +138,9 @@
         </div>
 
         <!-- Footer / Pagination Area -->
-        @if($salles->count() > 8)
-        <div class="px-6 py-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p class="text-[13px] text-gray-500 font-medium">
-                Affichage de <span class="font-bold text-gray-900">1 à {{ min($salles->count(), 8) }}</span> sur <span class="font-bold text-gray-900">{{ $salles->count() }}</span> résultats
-            </p>
-            <div class="flex items-center gap-1.5">
-                <button class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 disabled:opacity-50" disabled>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <button class="w-8 h-8 rounded-lg bg-[#00c950] text-white font-bold text-sm flex items-center justify-center shadow-sm">1</button>
-                <button class="w-8 h-8 rounded-lg border border-gray-200 text-gray-600 font-medium text-sm flex items-center justify-center hover:bg-gray-50 transition-colors">2</button>
-                <button class="w-8 h-8 rounded-lg border border-gray-200 text-gray-600 font-medium text-sm flex items-center justify-center hover:bg-gray-50 transition-colors">3</button>
-                <button class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-            </div>
+        @if($salles->hasPages())
+         <div class="px-6 py-4 border-t border-gray-100">
+            {{ $salles->links() }}
         </div>
         @endif
         @endif

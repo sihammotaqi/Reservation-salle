@@ -11,7 +11,7 @@ class EquipementController extends Controller
 {
     public function index()
     {
-        $equipements = Equipement::latest()->get();
+        $equipements = Equipement::latest()->paginate(5);
         return view('admin.equipements.index', compact('equipements'));
     }
 

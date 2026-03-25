@@ -11,7 +11,7 @@ class UserSalleController extends Controller
 {
     public function index()
     {
-        $salles = Salle::with('equipements')->where('disponible', 1)->get();
+        $salles = Salle::with('equipements')->where('disponible', 1)->paginate(5);
         return view('user.salles.index', compact('salles'));
     }
 

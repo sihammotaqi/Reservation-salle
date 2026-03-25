@@ -10,7 +10,7 @@ class SalleController extends Controller
 {
     public function index()
     {
-        $salles = Salle::with('equipements')->withCount(['plannings'])->latest()->get();
+        $salles = Salle::with('equipements')->withCount(['plannings'])->latest()->paginate(5);
         return view('admin.salles.index', compact('salles'));
     }
 

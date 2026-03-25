@@ -124,47 +124,12 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Footer / Pagination Area -->
         @if($utilisateurs->hasPages())
-        <div class="px-6 py-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p class="text-[13px] text-gray-500 font-medium">
-                Affichage de <span class="font-bold text-gray-900">{{ $utilisateurs->firstItem() ?? 0 }} à {{ $utilisateurs->lastItem() ?? 0 }}</span> sur <span class="font-bold text-gray-900">{{ $utilisateurs->total() }}</span> utilisateurs
-            </p>
-            <div class="flex items-center gap-1.5">
-                <!-- Use actual pagination links but styled -->
-                @if ($utilisateurs->onFirstPage())
-                    <button class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 disabled:opacity-50" disabled>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                @else
-                    <a href="{{ $utilisateurs->previousPageUrl() }}" class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                    </a>
-                @endif
-
-                <!-- We just show current page directly for mockup simplicity -->
-                <button class="w-8 h-8 rounded-lg bg-[#00c950] text-white font-bold text-sm flex items-center justify-center shadow-sm">{{ $utilisateurs->currentPage() }}</button>
-
-                @if ($utilisateurs->hasMorePages())
-                    <a href="{{ $utilisateurs->nextPageUrl() }}" class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                @else
-                    <button class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 disabled:opacity-50" disabled>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                @endif
-            </div>
+        <div class="px-6 py-4 border-t border-gray-100">
+    {{ $utilisateurs->links() }}
         </div>
-        @else
-        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-             <p class="text-[13px] text-gray-500 font-medium">
-                Affichage de <span class="font-bold text-gray-900">1 à {{ $utilisateurs->count() }}</span> sur <span class="font-bold text-gray-900">{{ $utilisateurs->total() }}</span> utilisateurs
-            </p>
-        </div>
-        @endif
-        @endif
+    @endif
+    @endif
     </div>
 </div>
 @endsection

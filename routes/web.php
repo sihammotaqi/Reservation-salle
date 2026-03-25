@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\EquipementController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserSalleController;
 use App\Http\Controllers\User\UserReservationController;
+use App\Http\Controllers\Responsable\ResponsableDashboardController;
+use App\Http\Controllers\Responsable\ResponsablePlanningController;
 
 // Guest routes
 Route::middleware('guest')->group(function () {
@@ -26,6 +28,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         if (Auth::user()->role === 'admin') {
             return view('dashboard');
+        }
+        if (Auth::user()->role === 'responsible') {
+        return redirect()->route('responsable.dashboard');
         }
         return redirect()->route('user.dashboard');
     })->name('dashboard');
@@ -54,6 +59,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('planning', PlanningController::class);
     Route::resource('equipements', EquipementController::class)->except(['create', 'edit', 'show']);
 });
+
+Route::middleware(['auth', 'responsable'])->prefix('responsable')->name('responsable.')->group(function () {
+    Route::get('/dashboard', [ResponsableDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/reservations/{planning}/approuver', [ResponsableDashboardController::class, 'approuver'])->name('reservations.approuver');
+    Route::post('/reservations/{planning}/rejeter', [ResponsableDashboardController::class, 'rejeter'])->name('reservations.rejeter');
+    Route::get('/salles', [ResponsablePlanningController::class, 'index'])->name('salles.index');
+    Route::post('/reservations', [ResponsableDashboardController::class, 'store'])->name('reservations.store');
+});
+
 
 // Root redirect
 Route::get('/', function () {
