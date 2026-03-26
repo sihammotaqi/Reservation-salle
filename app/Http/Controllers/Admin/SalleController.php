@@ -31,7 +31,8 @@ class SalleController extends Controller
     public function create()
     {
         $equipements = Equipement::all();
-        return view('admin.salles.create', compact('equipements'));
+        $responsables = \App\Models\User::whereIn('role', ['admin', 'responsible'])->get();
+        return view('admin.salles.create', compact('equipements', 'responsables'));
     }
 
     public function store(Request $request)
@@ -42,6 +43,7 @@ class SalleController extends Controller
             'localisation'  => 'nullable|string|max:255',
             'description'   => 'nullable|string',
             'disponible'    => 'boolean',
+            'responsable_id'=> 'nullable|exists:users,id',
             'equipements'   => 'nullable|array',
             'equipements.*' => 'integer|min:0',
         ]);
@@ -74,6 +76,7 @@ class SalleController extends Controller
             'capacite'    => $request->capacite,
             'localisation'=> $request->localisation,
             'description' => $request->description,
+            'responsable_id'=> $request->responsable_id,
             'disponible'  => $request->has('disponible'),
         ]);
 
@@ -93,7 +96,8 @@ class SalleController extends Controller
     public function edit(Salle $salle)
     {
         $equipements = Equipement::all();
-        return view('admin.salles.edit', compact('salle', 'equipements'));
+        $responsables = \App\Models\User::whereIn('role', ['admin', 'responsible'])->get();
+        return view('admin.salles.edit', compact('salle', 'equipements', 'responsables'));
     }
 
     public function update(Request $request, Salle $salle)
@@ -102,6 +106,7 @@ class SalleController extends Controller
             'nom'          => 'required|string|max:255',
             'capacite'     => 'required|integer|min:1',
             'localisation' => 'nullable|string|max:255',
+            'responsable_id'=> 'nullable|exists:users,id',
             'description'  => 'nullable|string',
         ]);
 
@@ -134,6 +139,7 @@ class SalleController extends Controller
             'capacite'     => $request->capacite,
             'localisation' => $request->localisation,
             'description'  => $request->description,
+            'responsable_id'=> $request->responsable_id,
             'disponible'   => $request->has('disponible'),
         ]);
 

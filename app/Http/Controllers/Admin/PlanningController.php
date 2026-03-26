@@ -33,7 +33,7 @@ class PlanningController extends Controller
     public function create()
     {
         $salles = Salle::where('disponible', true)->get();
-        $utilisateurs = User::all();
+        $utilisateurs = [\Illuminate\Support\Facades\Auth::user()];
         return view('admin.planning.create', compact('salles', 'utilisateurs'));
     }
 

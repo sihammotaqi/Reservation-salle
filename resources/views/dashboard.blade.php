@@ -112,14 +112,7 @@
                     <h1 class="text-2xl font-bold text-gray-900">Tableau de Bord Global</h1>
                     <p class="text-sm text-gray-500 mt-1">Aperçu général du système de réservation et de son utilisation.</p>
                 </div>
-                <!-- Search Bar -->
-                <div class="relative hidden sm:block">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" placeholder="Rechercher des salles, utilisateurs..."
-                        class="pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 w-72 transition-all">
-                </div>
+
             </div>
 
             <!-- Stats Cards -->
@@ -266,13 +259,9 @@
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         </button>
                                     </form>
-                                    <form method="POST" action="{{ route('admin.planning.update', $p) }}">
-                                        @csrf @method('PUT')
-                                        <input type="hidden" name="statut" value="rejete">
-                                        <button type="submit" class="text-red-400 hover:text-red-600 transition-colors" title="Rejeter">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" onclick="openRejectModal('{{ route('admin.planning.update', $p) }}')" class="text-red-400 hover:text-red-600 transition-colors" title="Rejeter">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -303,6 +292,51 @@
         </div>
     </div><!-- /Main Container -->
 
+    <!-- Reject Confirmation Modal -->
+    <div id="reject-modal" class="fixed inset-0 z-[100] hidden bg-gray-900/40 flex items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-[20px] shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-transform" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Confirmer le refus</h3>
+                </div>
+                <button type="button" onclick="closeRejectModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Body & Form -->
+            <form id="reject-form" method="POST" action="">
+                @csrf @method('PUT')
+                <input type="hidden" name="statut" value="rejete">
+                
+                <div class="p-6">
+                    <p class="text-[15px] text-gray-600 mb-6 leading-relaxed">
+                        Êtes-vous sûr de vouloir refuser cette demande de réservation ? Cette action informera l'utilisateur de votre décision.
+                    </p>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Motif du refus <span class="font-normal text-gray-400">(optionnel)</span></label>
+                        <textarea name="motif_refus" rows="3" class="w-full px-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all resize-none placeholder-gray-400" placeholder="Veuillez indiquer le motif du refus pour aider l'utilisateur..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeRejectModal()" class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-all shadow-sm">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-[#ef4444] hover:bg-[#dc2626] rounded-xl transition-all shadow-sm shadow-red-500/20">
+                        Confirmer le refus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @php
         $countSalles       = \App\Models\Salle::count();
         $countReservations = \App\Models\Planning::count();
@@ -322,6 +356,23 @@
             if (w && !w.contains(e.target)) {
                 document.getElementById('profile-dropdown')?.classList.add('hidden');
                 document.getElementById('profile-chevron')?.classList.remove('rotate-180');
+            }
+        });
+
+        function openRejectModal(formActionUrl) {
+            const modal = document.getElementById('reject-modal');
+            const form = document.getElementById('reject-form');
+            form.action = formActionUrl;
+            modal.classList.remove('hidden');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject-modal').classList.add('hidden');
+        }
+
+        document.getElementById('reject-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRejectModal();
             }
         });
     </script>

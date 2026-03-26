@@ -82,6 +82,23 @@
                     </div>
                     @error('capacite') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Responsable / Admin assigné</label>
+                    <div class="relative">
+                        <select name="responsable_id"
+                            class="w-full px-4 py-3 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm font-medium transition-all appearance-none cursor-pointer">
+                            <option value="">-- Aucun responsable --</option>
+                            @foreach($responsables as $resp)
+                                <option value="{{ $resp->id }}" {{ old('responsable_id') == $resp->id ? 'selected' : '' }}>
+                                    {{ $resp->name }} ({{ ucfirst($resp->role) }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <svg class="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    @error('responsable_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div class="border-t border-gray-100"></div>
