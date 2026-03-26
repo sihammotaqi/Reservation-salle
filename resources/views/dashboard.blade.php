@@ -201,10 +201,9 @@
                     <tbody id="pending-tbody" class="divide-y divide-gray-50">
                         @php
                             $pending = \App\Models\Planning::with(['salle', 'user'])
-                                ->where('statut', 'en_attente')
-                                ->latest()
-                                ->take(10)
-                                ->get();
+                            ->where('statut', 'en_attente')
+                            ->latest()
+                            ->paginate(5);
                         @endphp
 
                         @forelse($pending as $p)
@@ -277,14 +276,15 @@
 
                 <!-- Table Footer -->
                 <div class="flex items-center justify-between px-5 py-4 border-t border-gray-100">
-                    <p class="text-sm text-gray-500">
-                        Affichage de {{ $pending->count() }} demande(s) en attente
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('admin.planning.index') }}"
-                           class="px-4 py-1.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors">
-                            Voir tout
-                        </a>
+    
+    <p class="text-sm text-gray-500">
+        Affichage de {{ $pending->firstItem() }} à {{ $pending->lastItem() }} sur {{ $pending->total() }} demande(s) en attente
+    </p>
+
+    {{ $pending->links() }}
+
+</div>
+                        
                     </div>
                 </div>
             </div>

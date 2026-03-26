@@ -8,6 +8,7 @@ use App\Models\Planning;
 use App\Models\Salle;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Services\ReservationService;
 
 class UserReservationController extends Controller
 {
@@ -31,55 +32,33 @@ class UserReservationController extends Controller
         return view('user.reservations.index', compact('reservations'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'salle_id'        => 'required|exists:salles,id',
-            'titre'           => 'required|string|max:255',
-            'type_evenement'  => 'required|string|max:255',
-            'date_debut'      => 'required|date|after_or_equal:now',
-            'date_fin'        => 'required|date|after:date_debut',
-        ]);
+    public function store(Request $request, ReservationService $service)
+{
+    $request->validate([
+        'salle_id'       => 'required|exists:salles,id',
+        'titre'          => 'required|string|max:255',
+        'type_evenement' => 'required|string|max:255',
+        'date_debut'     => 'required|date|after_or_equal:now',
+        'date_fin'       => 'required|date|after:date_debut',
+    ]);
 
-        $salle = Salle::findOrFail($request->salle_id);
-
-        if (!$salle->disponible) {
-            return back()->with('error', 'Cette salle n\'est pas disponible.')->withInput();
-        }
-
-        // ✅ FIX: Vérifier conflits avec PENDING + APPROVED (pas seulement approved)
-        $conflict = Planning::where('salle_id', $request->salle_id)
-            ->whereIn('statut', [Planning::STATUT_EN_ATTENTE, Planning::STATUT_APPROUVE])
-            ->where(function ($query) use ($request) {
-                $query->whereBetween('date_debut', [$request->date_debut, $request->date_fin])
-                      ->orWhereBetween('date_fin', [$request->date_debut, $request->date_fin])
-                      ->orWhere(function ($q) use ($request) {
-                          $q->where('date_debut', '<=', $request->date_debut)
-                            ->where('date_fin', '>=', $request->date_fin);
-                      });
-            })
-            ->exists();
-
-        if ($conflict) {
-            return back()
-                ->with('error', 'Conflit d\'horaire détecté. Cette salle est déjà réservée ou en attente sur ce créneau. Veuillez choisir un autre créneau ou une autre salle.')
-                ->withInput();
-        }
-
-        Planning::create([
+    try {
+        $service->create([
             'salle_id'       => $request->salle_id,
-            'user_id'        => Auth::id(),
+            'user_id'        => auth()->id(),
             'titre'          => $request->titre,
             'type_evenement' => $request->type_evenement,
-            'date_debut'     => Carbon::parse($request->date_debut),
-            'date_fin'       => Carbon::parse($request->date_fin),
-            'statut'         => Planning::STATUT_EN_ATTENTE,
+            'date_debut'     => $request->date_debut,
+            'date_fin'       => $request->date_fin,
+            'statut'         => 'en_attente',
         ]);
 
-        return redirect()->route('user.reservations.index')
-            ->with('success', 'Votre demande de réservation a été envoyée et est en attente de validation.');
-    }
+        return back()->with('success', 'Réservation créée');
 
+    } catch (\Exception $e) {
+        return back()->with('error', $e->getMessage());
+    }
+}
     public function destroy(Planning $planning)
     {
         if ($planning->user_id !== Auth::id()) {

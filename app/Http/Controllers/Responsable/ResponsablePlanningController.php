@@ -12,11 +12,12 @@ class ResponsablePlanningController extends Controller
         $today = Carbon::today();
 
         // Salles paginées pour le planning (5 par page)
-        $salles = Salle::with(['plannings' => function ($q) {
+        $salles = Salle::with(['plannings' => function ($q) use ($today) {
             $q->whereIn('statut', ['approuve', 'en_attente'])
-              ->where('date_fin', '>=', now())
-              ->with('user')
-              ->orderBy('date_debut');
+            ->whereDate('date_debut', '<=', $today)
+            ->whereDate('date_fin', '>=', $today)
+            ->with('user')
+            ->orderBy('date_debut');
         }])->where('disponible', true)->paginate(5);
 
         // Toutes les salles pour le select du modal (pas paginées)

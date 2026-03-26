@@ -12,23 +12,16 @@ use Carbon\Carbon;
 class PlanningController extends Controller
 {
     public function index(Request $request)
-    {
-        $today = Carbon::today();
-        $view  = $request->get('view', 'timeline');
+{
+    $date = $request->input('date', now()->toDateString());
 
-        // Pour la timeline — salles avec leurs réservations du jour en cours et à venir
-        $salles = Salle::with(['plannings' => function ($q) use ($today) {
-            $q->whereIn('statut', ['approuve', 'en_attente', 'rejete'])
-              ->where('date_fin', '>=', now())
-              ->with('user')
-              ->orderBy('date_debut');
-        }])->where('disponible', true)->paginate(5);
+    $salles =Salle::with(['plannings' => function ($q) use ($date) {
+        $q->whereDate('date_debut', '<=', $date)
+          ->whereDate('date_fin', '>=', $date);
+    }])->paginate(5);
 
-        // Pour la liste — toutes les réservations
-        $plannings = Planning::with(['salle', 'user'])->latest()->paginate(5);
-
-        return view('admin.planning.index', compact('plannings', 'salles', 'today', 'view'));
-    }
+    return view('admin.planning.index', compact('salles', 'date'));
+}
 
     public function create()
     {
