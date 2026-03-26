@@ -11,24 +11,33 @@
         <span class="font-semibold text-gray-900">Modifier la salle: {{ $salle->nom }}</span>
     </div>
 
+    <!-- Global stock errors -->
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+            <p class="font-semibold mb-1">Veuillez corriger les erreurs suivantes :</p>
+            <ul class="list-disc list-inside space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Main Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-10">
         <form method="POST" action="{{ route('admin.salles.update', $salle) }}" class="space-y-10">
             @csrf
             @method('PUT')
 
-            <!-- Section 1: Top Grid (4 inputs) -->
+            <!-- Section 1: Top Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <!-- Nom de la salle -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom de la salle</label>
                     <input type="text" name="nom" value="{{ old('nom', $salle->nom) }}" required
-                        class="w-full px-4 py-3 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm font-medium transition-all"
-                        placeholder="ex: Salle de Réunion A">
+                        class="w-full px-4 py-3 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm font-medium transition-all">
                     @error('nom') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Localisation -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Localisation</label>
                     <div class="relative">
@@ -45,18 +54,15 @@
                     @error('localisation') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- ID / Description -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
                     <input type="text" name="description" value="{{ old('description', $salle->description) }}"
-                        class="w-full px-4 py-3 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm font-medium transition-all"
-                        placeholder="Brève description de la salle">
+                        class="w-full px-4 py-3 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm font-medium transition-all">
                     @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Statut -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Statut Initial</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Statut</label>
                     <label class="relative inline-flex items-center cursor-pointer mt-2">
                         <input type="checkbox" name="disponible" value="1" class="sr-only peer" {{ old('disponible', $salle->disponible) ? 'checked' : '' }}>
                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
@@ -64,7 +70,6 @@
                     </label>
                 </div>
 
-                <!-- Capacité -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Capacité (Personnes)</label>
                     <div class="relative">
@@ -78,9 +83,6 @@
                 </div>
             </div>
 
-
-
-            <!-- Diviseur -->
             <div class="border-t border-gray-100"></div>
 
             <!-- Section 2: Équipements -->
@@ -90,34 +92,45 @@
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                         Équipements de la salle
                     </h3>
-                    <p class="text-xs text-gray-500">(Sélectionnez les quantités allouées à cette salle)</p>
+                    <p class="text-xs text-gray-500">(Quantités allouées à cette salle)</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($equipements as $eq)
-                    @php 
+                    @php
                         $currentAssigned = $salle->equipements->find($eq->id)?->pivot->quantite ?? 0;
-                        $maxAllowed = $eq->quantite + $currentAssigned; // Max they can select is what's left in inventory PLUS what they've already taken for this room. Note: a true inventory system might be more complex, but this handles basic logical limits.
+                        $dejaUtilise = \Illuminate\Support\Facades\DB::table('equipement_salle')
+                            ->where('equipement_id', $eq->id)
+                            ->where('salle_id', '!=', $salle->id)
+                            ->sum('quantite');
+                        $stockDisponible = $eq->quantite - $dejaUtilise;
                     @endphp
-                    <div class="flex items-center justify-between p-4 rounded-xl border {{ $currentAssigned > 0 ? 'border-green-200 bg-green-50/20' : 'border-gray-100 bg-white' }} hover:border-green-200 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                    <div class="flex flex-col p-4 rounded-xl border {{ $errors->has('equipements.'.$eq->id) ? 'border-red-300 bg-red-50' : ($currentAssigned > 0 ? 'border-green-200 bg-green-50/20' : 'border-gray-100 bg-white hover:border-green-200') }} transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-gray-700">{{ $eq->nom }}</span>
+                                    <span class="text-[11px] {{ $stockDisponible <= 0 ? 'text-red-500 font-semibold' : 'text-gray-400' }}">
+                                        Disponible: {{ $stockDisponible }} / {{ $eq->quantite }}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-bold text-gray-700">{{ $eq->nom }}</span>
-                                <span class="text-[11px] text-gray-400">Stock total: {{ $eq->quantite }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-400">Qté:</span>
+                                <input type="number"
+                                    name="equipements[{{ $eq->id }}]"
+                                    value="{{ old('equipements.'.$eq->id, $currentAssigned) }}"
+                                    min="0"
+                                    max="{{ $eq->quantite }}"
+                                    class="w-16 h-10 px-2 text-center text-sm font-bold bg-gray-50 border {{ $errors->has('equipements.'.$eq->id) ? 'border-red-400' : ($currentAssigned > 0 ? 'border-green-300 text-green-700' : 'border-gray-200') }} rounded-lg focus:ring-1 focus:ring-green-500 focus:bg-white outline-none transition-all">
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-medium text-gray-400">Qté:</span>
-                            <input type="number" 
-                                name="equipements[{{ $eq->id }}]" 
-                                value="{{ $currentAssigned }}" 
-                                min="0" 
-                                max="{{ $maxAllowed }}" 
-                                class="w-16 h-10 px-2 text-center text-sm font-bold bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-green-500 focus:bg-white outline-none transition-all {{ $currentAssigned > 0 ? 'border-green-300 text-green-700' : '' }}">
-                        </div>
+                        @error('equipements.'.$eq->id)
+                            <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
+                        @enderror
                     </div>
                     @empty
                     <div class="col-span-full py-8 text-center text-sm text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
@@ -127,12 +140,10 @@
                 </div>
             </div>
 
-            <!-- Footer Buttons -->
+            <!-- Footer -->
             <div class="flex items-center justify-end gap-4 pt-6 mt-4">
-                <a href="{{ route('admin.salles.index') }}" class="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
-                    Annuler
-                </a>
-                <button type="submit" class="px-6 py-2.5 bg-[#00c950] hover:bg-[#00b046] text-white font-semibold text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#00c950]/20 outline-none">
+                <a href="{{ route('admin.salles.index') }}" class="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">Annuler</a>
+                <button type="submit" class="px-6 py-2.5 bg-[#00c950] hover:bg-[#00b046] text-white font-semibold text-sm rounded-lg transition-colors shadow-sm">
                     Mettre à jour la salle
                 </button>
             </div>

@@ -11,14 +11,25 @@
         <span class="font-semibold text-gray-900">Ajouter une nouvelle salle</span>
     </div>
 
+    <!-- Global stock errors -->
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
+            <p class="font-semibold mb-1">Veuillez corriger les erreurs suivantes :</p>
+            <ul class="list-disc list-inside space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Main Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-10">
         <form method="POST" action="{{ route('admin.salles.store') }}" class="space-y-10">
             @csrf
 
-            <!-- Section 1: Top Grid (4 inputs) -->
+            <!-- Section 1: Top Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <!-- Nom de la salle -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom de la salle</label>
                     <input type="text" name="nom" value="{{ old('nom') }}" required
@@ -27,7 +38,6 @@
                     @error('nom') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Localisation -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Localisation</label>
                     <div class="relative">
@@ -44,7 +54,6 @@
                     @error('localisation') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- ID / Description -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
                     <input type="text" name="description" value="{{ old('description') }}"
@@ -53,7 +62,6 @@
                     @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <!-- Statut -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Statut Initial</label>
                     <label class="relative inline-flex items-center cursor-pointer mt-2">
@@ -63,7 +71,6 @@
                     </label>
                 </div>
 
-                <!-- Capacité -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Capacité (Personnes)</label>
                     <div class="relative">
@@ -77,9 +84,6 @@
                 </div>
             </div>
 
-
-
-            <!-- Diviseur -->
             <div class="border-t border-gray-100"></div>
 
             <!-- Section 2: Équipements -->
@@ -91,35 +95,50 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($equipements as $eq)
-                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-green-200 transition-colors bg-white">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                    @php
+                        $dejaUtilise = \Illuminate\Support\Facades\DB::table('equipement_salle')
+                            ->where('equipement_id', $eq->id)->sum('quantite');
+                        $stockDisponible = $eq->quantite - $dejaUtilise;
+                    @endphp
+                    <div class="flex flex-col p-4 rounded-xl border {{ $errors->has('equipements.'.$eq->id) ? 'border-red-300 bg-red-50' : 'border-gray-100 bg-white hover:border-green-200' }} transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-bold text-gray-700">{{ $eq->nom }}</span>
+                                    <span class="text-[11px] {{ $stockDisponible <= 0 ? 'text-red-500 font-semibold' : 'text-gray-400' }}">
+                                        Disponible: {{ $stockDisponible }} / {{ $eq->quantite }}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-bold text-gray-700">{{ $eq->nom }}</span>
-                                <span class="text-[11px] text-gray-400">Total dispo: {{ $eq->quantite }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-400">Qté:</span>
+                                <input type="number"
+                                    name="equipements[{{ $eq->id }}]"
+                                    value="{{ old('equipements.'.$eq->id, 0) }}"
+                                    min="0"
+                                    max="{{ $eq->quantite }}"
+                                    class="w-16 h-10 px-2 text-center text-sm font-bold bg-gray-50 border {{ $errors->has('equipements.'.$eq->id) ? 'border-red-400' : 'border-gray-200' }} rounded-lg focus:ring-1 focus:ring-green-500 focus:bg-white outline-none transition-all">
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-medium text-gray-400">Qté:</span>
-                            <input type="number" name="equipements[{{ $eq->id }}]" value="0" min="0" max="{{ $eq->quantite }}" class="w-16 h-10 px-2 text-center text-sm font-bold bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-green-500 focus:bg-white outline-none transition-all">
-                        </div>
+                        @error('equipements.'.$eq->id)
+                            <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
+                        @enderror
                     </div>
                     @empty
                     <div class="col-span-full py-8 text-center text-sm text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
-                        Aucun équipement disponible dans le système. Allez dans "Gestion des Équipements" pour en ajouter.
+                        Aucun équipement disponible dans le système.
                     </div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- Footer Buttons -->
+            <!-- Footer -->
             <div class="flex items-center justify-end gap-4 pt-6 mt-4">
-                <a href="{{ route('admin.salles.index') }}" class="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
-                    Annuler
-                </a>
-                <button type="submit" class="px-6 py-2.5 bg-[#00c950] hover:bg-[#00b046] text-white font-semibold text-sm rounded-lg transition-colors shadow-sm focus:ring-4 focus:ring-[#00c950]/20 outline-none">
+                <a href="{{ route('admin.salles.index') }}" class="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">Annuler</a>
+                <button type="submit" class="px-6 py-2.5 bg-[#00c950] hover:bg-[#00b046] text-white font-semibold text-sm rounded-lg transition-colors shadow-sm">
                     Enregistrer la salle
                 </button>
             </div>

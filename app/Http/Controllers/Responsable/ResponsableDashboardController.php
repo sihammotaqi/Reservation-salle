@@ -33,7 +33,7 @@ class ResponsableDashboardController extends Controller
         $demandes = Planning::with(['salle', 'user'])
             ->where('statut', 'en_attente')
             ->orderBy('date_debut', 'asc')
-            ->paginate(10);
+            ->paginate(5);
 
         return view('responsable.dashboard', compact(
             'enAttente',

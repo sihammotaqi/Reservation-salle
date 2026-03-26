@@ -4,40 +4,77 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Salle;
+use App\Models\Equipement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SalleController extends Controller
 {
-    public function index()
-    {
-        $salles = Salle::with('equipements')->withCount(['plannings'])->latest()->paginate(5);
-        return view('admin.salles.index', compact('salles'));
+    public function index(Request $request)
+{
+    $query = Salle::with('equipements')->withCount(['plannings']);
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('nom', 'like', "%$search%")
+              ->orWhere('localisation', 'like', "%$search%");
+        });
     }
+
+    $salles = $query->latest()->paginate(5)->withQueryString();
+
+    return view('admin.salles.index', compact('salles'));
+}
 
     public function create()
     {
-        $equipements = \App\Models\Equipement::all();
+        $equipements = Equipement::all();
         return view('admin.salles.create', compact('equipements'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nom'          => 'required|string|max:255',
-            'capacite'     => 'required|integer|min:1',
-            'localisation' => 'nullable|string|max:255',
-            'description'  => 'nullable|string',
-            'disponible'   => 'boolean',
-            'equipements'  => 'nullable|array',
-            'equipements.*'=> 'integer|min:0'
+            'nom'           => 'required|string|max:255',
+            'capacite'      => 'required|integer|min:1',
+            'localisation'  => 'nullable|string|max:255',
+            'description'   => 'nullable|string',
+            'disponible'    => 'boolean',
+            'equipements'   => 'nullable|array',
+            'equipements.*' => 'integer|min:0',
         ]);
 
+        // ✅ Vérification du stock avant création
+        if ($request->has('equipements') && is_array($request->equipements)) {
+            foreach ($request->equipements as $equipementId => $quantite) {
+                if ($quantite > 0) {
+                    $equipement = Equipement::find($equipementId);
+                    if (!$equipement) continue;
+
+                    $dejaUtilise = DB::table('equipement_salle')
+                        ->where('equipement_id', $equipementId)
+                        ->sum('quantite');
+
+                    $disponible = $equipement->quantite - $dejaUtilise;
+
+                    if ($quantite > $disponible) {
+                        return back()->withInput()->withErrors([
+                            "equipements.{$equipementId}" =>
+                            "Stock insuffisant pour \"{$equipement->nom}\" : disponible {$disponible}, demandé {$quantite}."
+                        ]);
+                    }
+                }
+            }
+        }
+
         $salle = Salle::create([
-            'nom'          => $request->nom,
-            'capacite'     => $request->capacite,
-            'localisation' => $request->localisation,
-            'description'  => $request->description,
-            'disponible'   => $request->has('disponible'),
+            'nom'         => $request->nom,
+            'capacite'    => $request->capacite,
+            'localisation'=> $request->localisation,
+            'description' => $request->description,
+            'disponible'  => $request->has('disponible'),
         ]);
 
         if ($request->has('equipements') && is_array($request->equipements)) {
@@ -55,7 +92,7 @@ class SalleController extends Controller
 
     public function edit(Salle $salle)
     {
-        $equipements = \App\Models\Equipement::all();
+        $equipements = Equipement::all();
         return view('admin.salles.edit', compact('salle', 'equipements'));
     }
 
@@ -67,6 +104,30 @@ class SalleController extends Controller
             'localisation' => 'nullable|string|max:255',
             'description'  => 'nullable|string',
         ]);
+
+        // ✅ Vérification du stock avant mise à jour (en excluant la salle actuelle)
+        if ($request->has('equipements') && is_array($request->equipements)) {
+            foreach ($request->equipements as $equipementId => $quantite) {
+                if ($quantite > 0) {
+                    $equipement = Equipement::find($equipementId);
+                    if (!$equipement) continue;
+
+                    $dejaUtilise = DB::table('equipement_salle')
+                        ->where('equipement_id', $equipementId)
+                        ->where('salle_id', '!=', $salle->id)
+                        ->sum('quantite');
+
+                    $disponible = $equipement->quantite - $dejaUtilise;
+
+                    if ($quantite > $disponible) {
+                        return back()->withInput()->withErrors([
+                            "equipements.{$equipementId}" =>
+                            "Stock insuffisant pour \"{$equipement->nom}\" : disponible {$disponible}, demandé {$quantite}."
+                        ]);
+                    }
+                }
+            }
+        }
 
         $salle->update([
             'nom'          => $request->nom,
@@ -85,7 +146,6 @@ class SalleController extends Controller
             }
             $salle->equipements()->sync($syncData);
         } else {
-            // Optionnel: vider si on envoie rien, mais généralement on a des inputs cachés ou des valeurs à 0.
             $salle->equipements()->detach();
         }
 

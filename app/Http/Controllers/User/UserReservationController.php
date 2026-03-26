@@ -26,7 +26,7 @@ class UserReservationController extends Controller
             $query->where('statut', $request->statut);
         }
 
-        $reservations = $query->latest()->paginate(10);
+        $reservations = $query->latest()->paginate(5);
 
         return view('user.reservations.index', compact('reservations'));
     }
