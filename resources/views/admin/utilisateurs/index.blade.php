@@ -14,13 +14,13 @@
         </div>
         <div class="flex items-center gap-4 shrink-0 mt-2 md:mt-0">
             <!-- Search Input -->
-            <div class="relative hidden sm:block">
+            <form method="GET" action="{{ route('admin.utilisateurs.index') }}" class="relative hidden sm:block">
                 <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" placeholder="Rechercher un utilisateur"
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher un utilisateur"
                        class="pl-10 pr-4 py-2.5 w-64 text-sm font-medium bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c950] focus:border-[#00c950] transition-all shadow-sm placeholder-gray-400">
-            </div>
+            </form>
 
             <!-- Add Button -->
             <a href="{{ route('admin.utilisateurs.create') }}"
