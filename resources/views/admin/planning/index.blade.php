@@ -5,11 +5,16 @@
 @section('content')
 <div class="flex items-center justify-between mb-6">
     <div>
+        <p>{{ ($selectedDate ?? $today)->format('d/m/Y') }}</p>
         <h1 class="text-2xl font-bold text-gray-900">Salle Planning</h1>
-        <form method="GET">
-    <input type="date" name="date" value="{{ request('date', now()->toDateString()) }}">
+        <form method="GET" action="{{ route('admin.planning.index') }}">
+    <input type="date" name="date" value="{{ request('date', $today->toDateString()) }}">
     <button type="submit">Filtrer</button>
     </form>
+    <a href="{{ route('admin.planning.list') }}"
+   class="ml-3 px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900">
+    Liste
+</a>
         <p class="text-sm text-gray-500 mt-1">Visualisez les réservations des salles.</p>
     </div>
     <a href="{{ route('admin.planning.create') }}"
@@ -70,9 +75,13 @@
                         @foreach(['08','09','10','11','12','13','14','15','16','17'] as $hour)
                             <td class="px-1 py-2 text-center">
                                 @php
-                                    $reservation = $salle->plannings->first(function($p) use ($hour) {
-                                        return $p->date_debut->format('H') <= $hour && $p->date_fin->format('H') > $hour;
-                                    });
+                                $reservation = $salle->plannings
+                                ->where('date_debut', '>=', $selectedDate->startOfDay())
+                                ->where('date_debut', '<=', $selectedDate->endOfDay())
+                                ->first(function($p) use ($hour) {
+                                return $p->date_debut->format('H') <= $hour 
+                                && $p->date_fin->format('H:i') > $hour.':00';
+                                  });
                                 @endphp
                                 @if($reservation)
                                     @php

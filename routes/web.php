@@ -57,6 +57,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('salles', SalleController::class);
     Route::resource('utilisateurs', UtilisateurController::class);
     Route::resource('planning', PlanningController::class);
+    Route::get('/planning/list', [PlanningController::class, 'list'])
+    ->name('planning.list');
+
+    Route::resource('planning', PlanningController::class);
+
     Route::resource('equipements', EquipementController::class)->except(['create', 'edit', 'show']);
 });
 

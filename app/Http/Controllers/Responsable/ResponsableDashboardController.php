@@ -15,11 +15,23 @@ class ResponsableDashboardController extends Controller
     public function index()
     {
         // Stats
-        $enAttente   = Planning::where('statut', 'en_attente')->count();
+        $enAttente = Planning::where('statut', 'en_attente')
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->count();
         $validations = Planning::where('statut', 'approuve')
-                               ->whereMonth('updated_at', Carbon::now()->month)->count();
-        $refus       = Planning::where('statut', 'rejete')
-                               ->whereMonth('updated_at', Carbon::now()->month)->count();
+    ->whereMonth('updated_at', Carbon::now()->month)
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->count();
+        $refus = Planning::where('statut', 'rejete')
+    ->whereMonth('updated_at', Carbon::now()->month)
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->count();
         $totalMois   = $validations + $refus;
         $tauxRefus   = $totalMois > 0 ? round(($refus / $totalMois) * 100) : 0;
 
@@ -32,9 +44,12 @@ class ResponsableDashboardController extends Controller
 
         // Demandes en attente
         $demandes = Planning::with(['salle', 'user'])
-            ->where('statut', 'en_attente')
-            ->orderBy('date_debut', 'asc')
-            ->paginate(5);
+    ->where('statut', 'en_attente')
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->orderBy('date_debut', 'asc')
+    ->paginate(5);
 
         return view('responsable.dashboard', compact(
             'enAttente',

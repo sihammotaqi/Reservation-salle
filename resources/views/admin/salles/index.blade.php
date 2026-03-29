@@ -15,19 +15,37 @@
         <div class="flex items-center gap-4 shrink-0 mt-2 md:mt-0">
             <!-- Search Input -->
             <form method="GET" action="{{ route('admin.salles.index') }}" class="relative hidden sm:block">
-    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
 
-         <input 
-        type="text"
-        name="search"
-        value="{{ request('search') }}"
-        placeholder="Rechercher des salles"
-        class="pl-10 pr-4 py-2.5 w-64 text-sm font-medium bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all shadow-sm placeholder-gray-400">
-        </form>
+        <input 
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Rechercher des salles"
+            class="pl-10 pr-4 py-2.5 w-64 text-sm font-medium bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all shadow-sm placeholder-gray-400">
+    </form>
+
+    <!-- ✅ FILTER RESPONSABLE -->
+    <form method="GET" action="{{ route('admin.salles.index') }}">
+        <select name="responsable_id"
+            onchange="this.form.submit()"
+            class="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
+
+            <option value="">Responsable</option>
+
+            @foreach($responsables as $resp)
+                <option value="{{ $resp->id }}" {{ request('responsable_id') == $resp->id ? 'selected' : '' }}>
+                    {{ $resp->name }}
+                </option>
+            @endforeach
+
+        </select>
+    </form>
+
 
             <!-- Add Button -->
             <a href="{{ route('admin.salles.create') }}"

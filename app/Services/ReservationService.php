@@ -17,19 +17,35 @@ class ReservationService
                       $q->where('date_debut', '<=', $start)
                         ->where('date_fin', '>=', $end);
                   });
-            })->exists();
+            })
+            ->first(); // ❗ بدل exists
     }
 
     public function create($data)
     {
-        if ($this->checkConflict(
+        $conflict = $this->checkConflict(
             $data['salle_id'],
             $data['date_debut'],
             $data['date_fin']
-        )) {
-            throw new \Exception('Conflit détecté');
+        );
+
+        if ($conflict) {
+            throw new \Exception(
+                'Conflit avec "' . $conflict->titre . '" de ' .
+                $conflict->date_debut->format('H:i') .
+                ' à ' .
+                $conflict->date_fin->format('H:i')
+            );
         }
 
-        return Planning::create($data);
+        return Planning::create([
+            'salle_id'       => $data['salle_id'],
+            'user_id'        => $data['user_id'],
+            'titre'          => $data['titre'],
+            'type_evenement' => $data['type_evenement'] ?? null,
+            'date_debut'     => $data['date_debut'],
+            'date_fin'       => $data['date_fin'],
+            'statut'         => $data['statut'] ?? 'en_attente',
+        ]);
     }
 }

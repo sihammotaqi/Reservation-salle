@@ -14,6 +14,7 @@ class SalleController extends Controller
 {
     $query = Salle::with('equipements')->withCount(['plannings']);
 
+    // 🔍 search
     if ($request->filled('search')) {
         $search = $request->search;
 
@@ -23,9 +24,17 @@ class SalleController extends Controller
         });
     }
 
+    
+    if ($request->filled('responsable_id')) {
+        $query->where('responsable_id', $request->responsable_id);
+    }
+
     $salles = $query->latest()->paginate(5)->withQueryString();
 
-    return view('admin.salles.index', compact('salles'));
+    
+    $responsables = \App\Models\User::whereIn('role', ['admin', 'responsible'])->get();
+
+    return view('admin.salles.index', compact('salles', 'responsables'));
 }
 
     public function create()

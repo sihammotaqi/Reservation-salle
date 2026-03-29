@@ -56,7 +56,7 @@
                                 <td class="px-1 py-2 text-center">
                                     @php
                                         $reservation = $salle->plannings->first(function($p) use ($hour) {
-                                            return $p->date_debut->format('H') <= $hour && $p->date_fin->format('H') > $hour;
+                                            return $p->date_debut->format('H') <= $hour && $p->date_fin->format('H:i') > $hour.':00';
                                         });
                                     @endphp
                                     @if($reservation)

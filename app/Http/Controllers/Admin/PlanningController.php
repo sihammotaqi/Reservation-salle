@@ -13,20 +13,43 @@ class PlanningController extends Controller
 {
     public function index(Request $request)
 {
-    $date = $request->input('date', now()->toDateString());
+    $today = Carbon::today();
+    $view  = $request->get('view', 'timeline');
 
-    $salles =Salle::with(['plannings' => function ($q) use ($date) {
-        $q->whereDate('date_debut', '<=', $date)
-          ->whereDate('date_fin', '>=', $date);
-    }])->paginate(5);
+    // ✅ هذا هو الفلتر الحقيقي (بلا ما تبدل today)
+    $selectedDate = $request->filled('date')
+    ? Carbon::createFromFormat('Y-m-d', $request->date)->startOfDay()
+    : $today;
 
-    return view('admin.planning.index', compact('salles', 'date'));
+    // Timeline
+    $salles = Salle::with(['plannings' => function ($q) use ($selectedDate) {
+        $q->whereIn('statut', ['approuve', 'en_attente', 'rejete'])
+          ->whereDate('date_debut', $selectedDate->toDateString())
+          ->with('user')
+          ->orderBy('date_debut');
+    }])
+    ->where('disponible', true)
+    ->paginate(5)
+    ->appends(request()->query());
+
+    // Liste
+    $plannings = Planning::with(['salle', 'user'])
+        ->latest()
+        ->paginate(5);
+
+    return view('admin.planning.index', compact(
+        'plannings',
+        'salles',
+        'today',
+        'selectedDate',
+        'view'
+    ));
 }
 
     public function create()
     {
         $salles = Salle::where('disponible', true)->get();
-        $utilisateurs = [\Illuminate\Support\Facades\Auth::user()];
+        $utilisateurs = User::all();
         return view('admin.planning.create', compact('salles', 'utilisateurs'));
     }
 
@@ -40,10 +63,30 @@ class PlanningController extends Controller
             'date_fin'   => 'required|date|after:date_debut',
         ]);
 
-        Planning::create(
-            $request->only(['salle_id', 'user_id', 'titre', 'date_debut', 'date_fin'])
-            + ['statut' => 'en_attente']
-        );
+        // ✅ Conflict check
+        $conflict = Planning::where('salle_id', $request->salle_id)
+            ->whereIn('statut', ['en_attente', 'approuve'])
+            ->where(function ($q) use ($request) {
+                $q->whereBetween('date_debut', [$request->date_debut, $request->date_fin])
+                  ->orWhereBetween('date_fin', [$request->date_debut, $request->date_fin])
+                  ->orWhere(function ($q) use ($request) {
+                      $q->where('date_debut', '<=', $request->date_debut)
+                        ->where('date_fin', '>=', $request->date_fin);
+                  });
+            })->exists();
+
+        if ($conflict) {
+            return back()->withInput()->with('error', 'Conflit d\'horaire détecté. Cette salle est déjà réservée ou en attente sur ce créneau.');
+        }
+
+        Planning::create([
+    'salle_id'   => $request->salle_id,
+    'user_id'    => auth()->id(),
+    'titre'      => $request->titre,
+    'date_debut' => $request->date_debut,
+    'date_fin'   => $request->date_fin,
+    'statut'     => 'en_attente',
+     ]);
 
         return redirect()->route('admin.planning.index')->with('success', 'Réservation créée.');
     }
@@ -54,6 +97,14 @@ class PlanningController extends Controller
         $planning->update(['statut' => $request->statut]);
         return redirect()->route('admin.planning.index')->with('success', 'Statut mis à jour.');
     }
+    public function list()
+{
+    $plannings = Planning::with(['salle', 'user'])
+        ->orderBy('date_debut', 'desc')
+        ->paginate(5);
+
+    return view('admin.planning.list', compact('plannings'));
+}
 
     public function destroy(Planning $planning)
     {
