@@ -56,7 +56,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('salles', SalleController::class);
     Route::resource('utilisateurs', UtilisateurController::class);
+    
+    // Custom routes for planning must come before the resource route
+    Route::get('/planning/list', [PlanningController::class, 'list'])->name('planning.list');
     Route::resource('planning', PlanningController::class);
+
     Route::resource('equipements', EquipementController::class)->except(['create', 'edit', 'show']);
 });
 
@@ -64,6 +68,7 @@ Route::middleware(['auth', 'responsable'])->prefix('responsable')->name('respons
     Route::get('/dashboard', [ResponsableDashboardController::class, 'index'])->name('dashboard');
     Route::post('/reservations/{planning}/approuver', [ResponsableDashboardController::class, 'approuver'])->name('reservations.approuver');
     Route::post('/reservations/{planning}/rejeter', [ResponsableDashboardController::class, 'rejeter'])->name('reservations.rejeter');
+    Route::get('/salles/list', [ResponsablePlanningController::class, 'list'])->name('salles.list');
     Route::get('/salles', [ResponsablePlanningController::class, 'index'])->name('salles.index');
     Route::post('/reservations', [ResponsableDashboardController::class, 'store'])->name('reservations.store');
 });

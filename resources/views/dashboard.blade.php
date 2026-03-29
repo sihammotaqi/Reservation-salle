@@ -201,10 +201,9 @@
                     <tbody id="pending-tbody" class="divide-y divide-gray-50">
                         @php
                             $pending = \App\Models\Planning::with(['salle', 'user'])
-                                ->where('statut', 'en_attente')
-                                ->latest()
-                                ->take(10)
-                                ->get();
+                            ->where('statut', 'en_attente')
+                            ->latest()
+                            ->paginate(5);
                         @endphp
 
                         @forelse($pending as $p)
@@ -252,14 +251,14 @@
                             <!-- Actions -->
                             <td class="px-5 py-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    <form method="POST" action="{{ route('admin.planning.update', $p) }}">
+                                    <form method="POST" action="{{ route('admin.planning.update', $p) }}" class="flex m-0 p-0">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="statut" value="approuve">
-                                        <button type="submit" class="text-green-500 hover:text-green-700 transition-colors" title="Approuver">
+                                        <button type="submit" class="text-green-500 hover:text-green-700 transition-colors flex items-center" title="Approuver">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         </button>
                                     </form>
-                                    <button type="button" onclick="openRejectModal('{{ route('admin.planning.update', $p) }}')" class="text-red-400 hover:text-red-600 transition-colors" title="Rejeter">
+                                    <button type="button" onclick="openRejectModal('{{ route('admin.planning.update', $p) }}')" class="text-red-400 hover:text-red-600 transition-colors flex items-center" title="Rejeter">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     </button>
                                 </div>
@@ -277,14 +276,15 @@
 
                 <!-- Table Footer -->
                 <div class="flex items-center justify-between px-5 py-4 border-t border-gray-100">
-                    <p class="text-sm text-gray-500">
-                        Affichage de {{ $pending->count() }} demande(s) en attente
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('admin.planning.index') }}"
-                           class="px-4 py-1.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors">
-                            Voir tout
-                        </a>
+    
+    <p class="text-sm text-gray-500">
+        Affichage de {{ $pending->firstItem() }} à {{ $pending->lastItem() }} sur {{ $pending->total() }} demande(s) en attente
+    </p>
+
+    {{ $pending->links() }}
+
+</div>
+                        
                     </div>
                 </div>
             </div>

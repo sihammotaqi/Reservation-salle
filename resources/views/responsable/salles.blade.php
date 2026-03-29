@@ -5,18 +5,47 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-8">
 
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Planning Global des Salles Gérées</h1>
-            <p class="text-gray-500 mt-1">{{ $today->format('l d F Y') }}</p>
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+        <div class="flex-1">
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Planning Global des Salles Gérées</h1>
+                <span class="px-3 py-1 bg-green-50 text-green-700 text-sm font-bold rounded-md border border-green-200/60 shadow-sm mt-1">
+                    {{ ($selectedDate ?? $today)->format('d/m/Y') }}
+                </span>
+            </div>
+            <p class="text-[15px] text-gray-500 mt-2 max-w-2xl leading-relaxed">
+                Visualisez et gérez l'occupation des salles sur une frise chronologique pour la date sélectionnée.
+            </p>
         </div>
-        <button onclick="openReservationModal(null)"
-            class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Nouvelle Réservation
-        </button>
+        
+        <div class="flex items-center gap-3 overflow-x-auto pb-2 lg:pb-0 shrink-0">
+            <!-- Date Filter Form -->
+            <form method="GET" action="{{ route('responsable.salles.index') }}" class="flex items-center gap-2">
+                <input type="date" name="date" value="{{ request('date', ($selectedDate ?? $today)->toDateString()) }}"
+                       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 h-10 transition-colors">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-lg shadow-sm transition-colors border border-gray-200 h-10">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    Filtrer
+                </button>
+            </form>
+
+            <div class="hidden sm:block w-px h-8 bg-gray-200 mx-1"></div>
+
+            <!-- View Toggle & Actions -->
+            <div class="flex items-center gap-3">
+                <a href="{{ route('responsable.salles.list') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-lg shadow-sm transition-colors h-10 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    Vue Liste
+                </a>
+
+                <button onclick="openReservationModal(null)"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-[#00c950] hover:bg-[#00b046] text-white text-sm font-bold rounded-lg shadow-sm transition-colors h-10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                    Nouvelle réservation
+                </button>
+            </div>
+        </div>
     </div>
 
     {{-- Légende --}}
@@ -56,7 +85,7 @@
                                 <td class="px-1 py-2 text-center">
                                     @php
                                         $reservation = $salle->plannings->first(function($p) use ($hour) {
-                                            return $p->date_debut->format('H') <= $hour && $p->date_fin->format('H') > $hour;
+                                            return $p->date_debut->format('H') <= $hour && $p->date_fin->format('H:i') > $hour.':00';
                                         });
                                     @endphp
                                     @if($reservation)

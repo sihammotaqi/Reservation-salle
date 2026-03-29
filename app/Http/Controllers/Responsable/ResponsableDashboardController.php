@@ -8,17 +8,30 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Salle;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Services\ReservationService;
 
 class ResponsableDashboardController extends Controller
 {
     public function index()
     {
         // Stats
-        $enAttente   = Planning::where('statut', 'en_attente')->count();
+        $enAttente = Planning::where('statut', 'en_attente')
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->count();
         $validations = Planning::where('statut', 'approuve')
-                               ->whereMonth('updated_at', Carbon::now()->month)->count();
-        $refus       = Planning::where('statut', 'rejete')
-                               ->whereMonth('updated_at', Carbon::now()->month)->count();
+    ->whereMonth('updated_at', Carbon::now()->month)
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->count();
+        $refus = Planning::where('statut', 'rejete')
+    ->whereMonth('updated_at', Carbon::now()->month)
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->count();
         $totalMois   = $validations + $refus;
         $tauxRefus   = $totalMois > 0 ? round(($refus / $totalMois) * 100) : 0;
 
@@ -31,9 +44,12 @@ class ResponsableDashboardController extends Controller
 
         // Demandes en attente
         $demandes = Planning::with(['salle', 'user'])
-            ->where('statut', 'en_attente')
-            ->orderBy('date_debut', 'asc')
-            ->paginate(5);
+    ->where('statut', 'en_attente')
+    ->whereHas('salle', function ($q) {
+        $q->where('responsable_id', auth()->id());
+    })
+    ->orderBy('date_debut', 'asc')
+    ->paginate(5);
 
         return view('responsable.dashboard', compact(
             'enAttente',
@@ -66,7 +82,7 @@ class ResponsableDashboardController extends Controller
 
         return back()->with('success', 'Réservation refusée.');
     }
-    public function store(Request $request)
+    public function store(Request $request, ReservationService $service)
     {
     $request->validate([
         'salle_id'       => 'required|exists:salles,id',
@@ -76,34 +92,22 @@ class ResponsableDashboardController extends Controller
         'date_fin'       => 'required|date|after:date_debut',
     ]);
 
-    $salle = Salle::findOrFail($request->salle_id);
+    try {
+        $service->create([
+            'salle_id'       => $request->salle_id,
+            'user_id'        => auth()->id(),
+            'titre'          => $request->titre,
+            'type_evenement' => $request->type_evenement,
+            'date_debut'     => $request->date_debut,
+            'date_fin'       => $request->date_fin,
+            'statut'         => 'en_attente',
+        ]);
 
-    $conflict = Planning::where('salle_id', $request->salle_id)
-        ->whereIn('statut', ['en_attente', 'approuve'])
-        ->where(function ($q) use ($request) {
-            $q->whereBetween('date_debut', [$request->date_debut, $request->date_fin])
-              ->orWhereBetween('date_fin', [$request->date_debut, $request->date_fin])
-              ->orWhere(function ($q) use ($request) {
-                  $q->where('date_debut', '<=', $request->date_debut)
-                    ->where('date_fin', '>=', $request->date_fin);
-              });
-        })->exists();
+        return redirect()->route('responsable.salles.index')
+            ->with('success', 'Réservation créée');
 
-    if ($conflict) {
-        return back()->with('error', 'Conflit d\'horaire détecté.');
+    } catch (\Exception $e) {
+        return back()->with('error', $e->getMessage());
     }
-
-    Planning::create([
-        'salle_id'       => $request->salle_id,
-        'user_id'        => Auth::id(),
-        'titre'          => $request->titre,
-        'type_evenement' => $request->type_evenement,
-        'date_debut'     => Carbon::parse($request->date_debut),
-        'date_fin'       => Carbon::parse($request->date_fin),
-        'statut'         => 'en_attente',
-    ]);
-
-    return redirect()->route('responsable.salles.index')
-        ->with('success', 'Demande de réservation envoyée.');
     }
 }

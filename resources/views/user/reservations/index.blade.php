@@ -5,57 +5,49 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-8">
 
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Historique des Réservations</h1>
-        <p class="text-gray-500 mt-1">Consultez et gérez vos réservations de salles passées et à venir.</p>
-    </div>
-
-    {{-- Notifications Flash --}}
-    @if(session('success'))
-        <div id="flash-success" class="flex items-center gap-3 bg-white border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm mb-6 animate-fade-in">
-            <div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                </svg>
-            </div>
-            <span class="text-sm font-medium">{{ session('success') }}</span>
-            <button onclick="document.getElementById('flash-success').remove()" class="ml-auto text-green-400 hover:text-green-600 text-lg leading-none">✕</button>
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
+        <div class="flex-1">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Historique des Réservations</h1>
+            <p class="text-[15px] text-gray-500 mt-2 max-w-2xl leading-relaxed">
+                Consultez et gérez vos réservations de salles passées et à venir.
+            </p>
         </div>
-    @endif
 
-    @if(session('error'))
-        <div id="flash-error" class="flex items-center gap-3 bg-white border border-red-200 text-red-800 px-4 py-3 rounded-xl shadow-sm mb-6">
-            <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </div>
-            <span class="text-sm font-medium">{{ session('error') }}</span>
-            <button onclick="document.getElementById('flash-error').remove()" class="ml-auto text-red-400 hover:text-red-600 text-lg leading-none">✕</button>
-        </div>
-    @endif
+        <form method="GET" action="{{ route('user.reservations.index') }}" class="flex flex-wrap items-center gap-2 shrink-0">
+            <!-- Salle Filter -->
+            <select name="salle_id" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 h-10 transition-colors">
+                <option value="">Toutes les salles</option>
+                @foreach($salles as $salle)
+                    <option value="{{ $salle->id }}" {{ request('salle_id') == $salle->id ? 'selected' : '' }}>
+                        {{ $salle->nom }}
+                    </option>
+                @endforeach
+            </select>
 
-    {{-- Filters --}}
-    <div class="flex flex-wrap gap-2 mb-5">
-        @php
-            $currentStatut = request('statut');
-            $filters = [
-                ''           => 'Toutes',
-                'en_attente' => 'En attente',
-                'approuve'   => 'Approuvées',
-                'rejete'     => 'Refusées',
-                'annule'     => 'Annulées',
-            ];
-        @endphp
-        @foreach($filters as $value => $label)
-            <a href="{{ route('user.reservations.index', $value ? ['statut' => $value] : []) }}"
-                class="px-4 py-1.5 rounded-full text-sm font-medium transition
-                {{ $currentStatut === $value || ($value === '' && !$currentStatut)
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                {{ $label }}
-            </a>
-        @endforeach
+            <!-- Date Filter -->
+            <input type="date" name="date" value="{{ request('date') }}"
+                   class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 h-10 transition-colors">
+
+            <!-- Statut Filter -->
+            <select name="statut" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 h-10 transition-colors">
+                <option value="">Tous les statuts</option>
+                <option value="en_attente" {{ request('statut') === 'en_attente' ? 'selected' : '' }}>En attente</option>
+                <option value="approuve" {{ request('statut') === 'approuve' ? 'selected' : '' }}>Approuvées</option>
+                <option value="rejete" {{ request('statut') === 'rejete' ? 'selected' : '' }}>Refusées</option>
+                <option value="annule" {{ request('statut') === 'annule' ? 'selected' : '' }}>Annulées</option>
+            </select>
+
+            <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-lg shadow-sm transition-colors border border-gray-200 h-10">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Filtrer
+            </button>
+            
+            @if(request()->filled('salle_id') || request()->filled('date') || request()->filled('statut'))
+                <a href="{{ route('user.reservations.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-bold rounded-lg shadow-sm transition-colors h-10">
+                    Effacer
+                </a>
+            @endif
+        </form>
     </div>
 
     {{-- Table --}}

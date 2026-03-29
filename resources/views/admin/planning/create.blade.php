@@ -11,10 +11,16 @@
     <div class="bg-white rounded-2xl shadow border border-gray-100 p-6">
         <form method="POST" action="{{ route('admin.planning.store') }}" class="space-y-5">
             @csrf
+            @if(session('error'))
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+                   {{ session('error') }}
+                </div>
+            @endif
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Titre *</label>
                 <input type="text" name="titre" value="{{ old('titre') }}" required
                     class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm">
+                <input type="hidden" name="user_id" value="{{ auth()->id() }}">
                 @error('titre') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
@@ -30,15 +36,9 @@
                 @error('salle_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Utilisateur *</label>
-                <select name="user_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none text-sm bg-white" required>
-                    <option value="">-- Sélectionner un utilisateur --</option>
-                    @foreach($utilisateurs as $u)
-                    <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
-                    @endforeach
-                </select>
-                @error('user_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-            </div>
+    <label class="text-sm text-gray-500">Utilisateur</label>
+    <input type="text" value="{{ auth()->user()->name }}" disabled class="w-full bg-gray-100">
+</div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Début *</label>

@@ -11,12 +11,6 @@
             <h1 class="text-2xl font-bold text-gray-900">Bonjour, {{ Auth::user()->name }}</h1>
             <p class="text-sm text-gray-500 mt-1">Bienvenue sur votre portail. Réservez une salle ou gérez vos demandes.</p>
         </div>
-        <div>
-            <a href="{{ route('user.salles.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00c950] text-white text-sm font-semibold rounded-xl hover:bg-[#00b046] transition-all shadow-sm shadow-[#00c950]/30 hover:shadow-[#00c950]/40">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Nouvelle Réservation
-            </a>
-        </div>
     </div>
 
     <!-- Stats Cards -->

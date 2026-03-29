@@ -48,7 +48,7 @@
                 $occupeeNow = $salle->plannings->first(function($p) use ($now) {
                     return $p->date_debut <= $now && $p->date_fin >= $now;
                 });
-                $isDisponible = !$occupeeNow;
+                $isDisponible = true;
             @endphp
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between hover:shadow-md transition">
@@ -113,15 +113,10 @@
 
                 {{-- Button --}}
                 <button
-                    @if($isDisponible)
-                        onclick="openReservationModal({{ $salle->id }}, '{{ addslashes($salle->nom) }}', {{ $salle->capacite }})"
-                        class="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 rounded-xl transition"
-                    @else
-                        disabled
-                        class="w-full bg-gray-100 text-gray-400 text-sm font-semibold py-2 rounded-xl cursor-not-allowed"
-                    @endif
+                onclick="openReservationModal({{ $salle->id }}, '{{ addslashes($salle->nom) }}', {{ $salle->capacite }})"
+                class="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2 rounded-xl transition"
                 >
-                    @if($isDisponible) Réserver @else Indisponible @endif
+                Réserver
                 </button>
             </div>
         @empty

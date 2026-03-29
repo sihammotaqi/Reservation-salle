@@ -3,16 +3,47 @@
 @section('title', 'Planning')
 
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Salle Planning</h1>
-        <p class="text-sm text-gray-500 mt-1">Gérez et approuvez les réservations de salles.</p>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+    <div class="flex-1">
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Salle Planning</h1>
+            <span class="px-3 py-1 bg-green-50 text-green-700 text-sm font-bold rounded-md border border-green-200/60 shadow-sm mt-1">
+                {{ ($selectedDate ?? $today)->format('d/m/Y') }}
+            </span>
+        </div>
+        <p class="text-[15px] text-gray-500 mt-2 max-w-2xl leading-relaxed">
+            Visualisez et gérez l'occupation des salles sur une frise chronologique pour la date sélectionnée.
+        </p>
     </div>
-    <a href="{{ route('admin.planning.create') }}"
-       class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl shadow transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Nouvelle réservation
-    </a>
+    
+    <div class="flex items-center gap-3 overflow-x-auto pb-2 lg:pb-0 shrink-0">
+        <!-- Date Filter Form -->
+        <form method="GET" action="{{ route('admin.planning.index') }}" class="flex items-center gap-2">
+            <input type="date" name="date" value="{{ request('date', ($selectedDate ?? $today)->toDateString()) }}"
+                   class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 h-10 transition-colors">
+            <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-lg shadow-sm transition-colors border border-gray-200 h-10">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Filtrer
+            </button>
+        </form>
+
+        <div class="hidden sm:block w-px h-8 bg-gray-200 mx-1"></div>
+
+        <!-- View Toggle & Actions -->
+        <div class="flex items-center gap-3">
+            <a href="{{ route('admin.planning.list') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-lg shadow-sm transition-colors h-10 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Vue Liste
+            </a>
+
+            <a href="{{ route('admin.planning.create') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-[#00c950] hover:bg-[#00b046] text-white text-sm font-bold rounded-lg shadow-sm transition-colors h-10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                Nouvelle réservation
+            </a>
+        </div>
+    </div>
 </div>
 
 {{-- Flash --}}
@@ -26,21 +57,7 @@
     </div>
 @endif
 
-{{-- Tabs --}}
-<div class="flex gap-2 mb-5">
-    @php $view = request('view', 'timeline'); @endphp
-    <a href="{{ request()->fullUrlWithQuery(['view' => 'timeline']) }}"
-        class="px-4 py-1.5 rounded-full text-sm font-medium transition {{ $view === 'timeline' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-        Timeline
-    </a>
-    <a href="{{ request()->fullUrlWithQuery(['view' => 'liste']) }}"
-        class="px-4 py-1.5 rounded-full text-sm font-medium transition {{ $view === 'liste' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-        Liste
-    </a>
-</div>
-
-@if($view === 'timeline')
-{{-- ===== TIMELINE VIEW ===== --}}
+{{-- Légende --}}
 <div class="mb-4 flex items-center gap-4">
     <div class="flex items-center gap-1.5">
         <span class="w-3 h-3 rounded-full bg-green-400"></span>
@@ -56,6 +73,7 @@
     </div>
 </div>
 
+{{-- Timeline --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -79,9 +97,13 @@
                         @foreach(['08','09','10','11','12','13','14','15','16','17'] as $hour)
                             <td class="px-1 py-2 text-center">
                                 @php
-                                    $reservation = $salle->plannings->first(function($p) use ($hour) {
-                                        return $p->date_debut->format('H') <= $hour && $p->date_fin->format('H') > $hour;
-                                    });
+                                $reservation = $salle->plannings
+                                ->where('date_debut', '>=', $selectedDate->startOfDay())
+                                ->where('date_debut', '<=', $selectedDate->endOfDay())
+                                ->first(function($p) use ($hour) {
+                                return $p->date_debut->format('H') <= $hour 
+                                && $p->date_fin->format('H:i') > $hour.':00';
+                                  });
                                 @endphp
                                 @if($reservation)
                                     @php
@@ -117,112 +139,6 @@
         </div>
     @endif
 </div>
-
-@else
-{{-- ===== LISTE VIEW ===== --}}
-<div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
-    @if($plannings->isEmpty())
-        <div class="text-center py-16 text-gray-400">
-            <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <p class="text-sm font-medium">Aucune réservation trouvée.</p>
-        </div>
-    @else
-    <table class="min-w-full divide-y divide-gray-100">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Demandeur</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Salle</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Horaire</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Statut</th>
-                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            @foreach($plannings as $planning)
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold text-xs flex-shrink-0">
-                            {{ strtoupper(substr($planning->user->name ?? 'U', 0, 2)) }}
-                        </div>
-                        <div>
-                            <div class="font-medium text-gray-800 text-sm">{{ $planning->user->name ?? '—' }}</div>
-                            <div class="text-xs text-gray-400">{{ $planning->titre }}</div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-600">
-                    <div class="font-medium">{{ $planning->salle->nom ?? '—' }}</div>
-                    @if($planning->salle?->localisation)
-                        <div class="text-xs text-gray-400">{{ $planning->salle->localisation }}</div>
-                    @endif
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-500">
-                    <div>{{ $planning->date_debut->format('H:i') }} - {{ $planning->date_fin->format('H:i') }}</div>
-                    <div class="text-xs text-gray-400">{{ $planning->date_debut->format('d M Y') }}</div>
-                </td>
-                <td class="px-6 py-4">
-                    @if($planning->type_evenement)
-                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{ $planning->type_evenement }}</span>
-                    @else
-                        <span class="text-gray-400 text-xs">—</span>
-                    @endif
-                </td>
-                <td class="px-6 py-4">
-                    @php
-                        $statuts = [
-                            'en_attente' => 'bg-orange-100 text-orange-700',
-                            'approuve'   => 'bg-green-100 text-green-700',
-                            'rejete'     => 'bg-red-100 text-red-600',
-                            'annule'     => 'bg-gray-100 text-gray-500',
-                        ];
-                        $labels = [
-                            'en_attente' => 'En attente',
-                            'approuve'   => 'Approuvé',
-                            'rejete'     => 'Rejeté',
-                            'annule'     => 'Annulé',
-                        ];
-                    @endphp
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $statuts[$planning->statut] ?? '' }}">
-                        {{ $labels[$planning->statut] ?? $planning->statut }}
-                    </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                        @if($planning->statut !== 'approuve')
-                        <form method="POST" action="{{ route('admin.planning.update', $planning) }}">
-                            @csrf @method('PUT')
-                            <input type="hidden" name="statut" value="approuve">
-                            <button type="submit" class="text-xs font-semibold text-green-600 hover:text-green-800">Approuver</button>
-                        </form>
-                        @endif
-                        @if($planning->statut !== 'rejete')
-                        <form method="POST" action="{{ route('admin.planning.update', $planning) }}">
-                            @csrf @method('PUT')
-                            <input type="hidden" name="statut" value="rejete">
-                            <button type="submit" class="text-xs font-semibold text-orange-500 hover:text-orange-700">Rejeter</button>
-                        </form>
-                        @endif
-                        <form method="POST" action="{{ route('admin.planning.destroy', $planning) }}" onsubmit="return confirm('Supprimer cette réservation ?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-xs font-semibold text-red-500 hover:text-red-700">Supprimer</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @if($plannings->hasPages())
-        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-            <span>Affichage de {{ $plannings->firstItem() }} à {{ $plannings->lastItem() }} sur {{ $plannings->total() }} réservations</span>
-            {{ $plannings->appends(request()->query())->links() }}
-        </div>
-    @endif
-    @endif
-</div>
-@endif
 
 <script>
 setTimeout(() => {
